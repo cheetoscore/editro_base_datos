@@ -1,13 +1,13 @@
+import os
 import pandas as pd
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.exc import SQLAlchemyError
 
-# 📌 Configuración de conexión
+# 📌 Configuración de conexión mediante variables de entorno
+DB_LOCAL_URL = os.getenv("DB_LOCAL_URL", "postgresql://postgres:password@localhost/jergo_local")
+DB_ONLINE_URL = os.getenv("DB_ONLINE_URL", "postgresql://user:pass@host/jergo_db?sslmode=require")
 
-DB_LOCAL_URL = "postgresql://postgres:1113@localhost/jergo_local"
 engine_local = create_engine(DB_LOCAL_URL, pool_pre_ping=True)
-
-DB_ONLINE_URL = "postgresql://jergo_db_owner:npg_p0Shbuz1Nijq@ep-bitter-glade-a5fgh7ka-pooler.us-east-2.aws.neon.tech/jergo_db?sslmode=require"
 engine_online = create_engine(DB_ONLINE_URL, pool_pre_ping=True)
 
 # 🔁 Orden correcto de tablas según relaciones foráneas
@@ -33,35 +33,27 @@ ORDEN_DEPENDENCIAS = [
     "requerimientos",
     "db_insumos_programados",
     "db_insumos_gastados",
-    "listado_insumos_programados"
+    "listado_insumos_programados",
 ]
 
+
 def obtener_tablas(direccion: str = "online"):
-    """
-    Retorna una lista de todas las tablas en la base de datos seleccionada.
-    :param direccion: 'online' o 'local'
-    :return: lista de nombres de tablas
-    """
+    """Retorna una lista de todas las tablas en la base seleccionada."""
     engine = engine_online if direccion == "online" else engine_local
     inspector = inspect(engine)
-    return inspector.get_table_names(schema='public')
+    return inspector.get_table_names(schema="public")
+
 
 def ordenar_tablas(tablas: list) -> list:
-    """
-    Ordena las tablas según la jerarquía de dependencias.
-    """
+    """Ordena las tablas según la jerarquía de dependencias."""
     ordenadas = [t for t in ORDEN_DEPENDENCIAS if t in tablas]
     restantes = [t for t in tablas if t not in ordenadas]
     return ordenadas + restantes
 
-def sincronizar(tablas: list, direccion: str = "local_a_online"):
-    """
-    Sincroniza datos entre base local y NEON sin borrar las tablas (usa DELETE + INSERT).
 
-    :param tablas: lista de tablas a sincronizar
-    :param direccion: 'local_a_online' o 'online_a_local'
-    """
-    errores = []
+def sincronizar(tablas: list, direccion: str = "local_a_online"):
+    """Sincroniza datos entre base local y NEON sin borrar las tablas."""
+    errores: list[tuple[str, str]] = []
     tablas_ordenadas = ordenar_tablas(tablas)
 
     for tabla in tablas_ordenadas:
@@ -77,15 +69,12 @@ def sincronizar(tablas: list, direccion: str = "local_a_online"):
             else:
                 raise ValueError("Dirección inválida: usa 'local_a_online' o 'online_a_local'")
 
-            # Leer del origen
             df = pd.read_sql(f"SELECT * FROM {tabla}", origen)
 
-            # Eliminar datos existentes en destino (respetando esquema)
             with destino.begin() as conn:
                 conn.execute(text(f"DELETE FROM {tabla}"))
 
-            # Insertar nuevos datos
-            df.to_sql(tabla, destino, if_exists='append', index=False)
+            df.to_sql(tabla, destino, if_exists="append", index=False)
             print(f"✅ '{tabla}' sincronizada correctamente.")
         except SQLAlchemyError as e:
             errores.append((tabla, str(e)))
@@ -95,3 +84,4 @@ def sincronizar(tablas: list, direccion: str = "local_a_online"):
         print("\n🚨 Errores durante la sincronización:")
         for tabla, msg in errores:
             print(f" - {tabla}: {msg}")
+
