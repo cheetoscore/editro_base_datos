@@ -7,6 +7,7 @@ from vista_editor_sub_apu import SubAPUEditor
 from vista_editor_insumos import crear_editor_insumos
 from logica_apus import recalcular_apu, guardar_apu, limpiar_filas_subtotales
 
+
 class EditorAPUs(QWidget):
     def __init__(self):
         super().__init__()
@@ -22,8 +23,16 @@ class EditorAPUs(QWidget):
 
         self.model = QStandardItemModel()
         self.model.setHorizontalHeaderLabels([
-            "ID", "ID Recurso", "Recurso", "Tipo", "Unidad",
-            "Cuadrilla", "Rendimiento", "Cantidad", "Precio", "Parcial"
+            "ID",
+            "ID Recurso",
+            "Recurso",
+            "Tipo",
+            "Unidad",
+            "Cuadrilla",
+            "Rendimiento",
+            "Cantidad",
+            "Precio",
+            "Parcial",
         ])
         self.table.setModel(self.model)
 
@@ -62,18 +71,16 @@ class EditorAPUs(QWidget):
         db = DBManager()
         self.model.removeRows(0, self.model.rowCount())
 
-        query = f"""
-            SELECT id, id_recurso, recurso_name, tipo, unidad,
-                   cuadrilla, rendimiento, cantidad, precio, parcial,
-                   codigo_partida, partida_name
-            FROM apu_programado
-            WHERE id_partida = {config.id_partida_actual}
-            ORDER BY id
-        """
+        query = (
+            "SELECT id, id_recurso, recurso_name, tipo, unidad, "
+            "cuadrilla, rendimiento, cantidad, precio, parcial, "
+            "codigo_partida, partida_name "
+            "FROM apu_programado WHERE id_partida = :id ORDER BY id"
+        )
 
         try:
             with db.engine.connect() as conn:
-                result = conn.execute(text(query))
+                result = conn.execute(text(query), {"id": config.id_partida_actual})
                 rows = result.fetchall()
 
                 if not rows:
@@ -120,10 +127,16 @@ class EditorAPUs(QWidget):
 
     def agregar_fila(self):
         nueva = [
-            QStandardItem("Nuevo"), QStandardItem(""), QStandardItem(""),
-            QStandardItem("MANO DE OBRA"), QStandardItem(""),
-            QStandardItem("0"), QStandardItem("0"), QStandardItem("0"),
-            QStandardItem("0"), QStandardItem("0")
+            QStandardItem("Nuevo"),
+            QStandardItem(""),
+            QStandardItem(""),
+            QStandardItem("MANO DE OBRA"),
+            QStandardItem(""),
+            QStandardItem("0"),
+            QStandardItem("0"),
+            QStandardItem("0"),
+            QStandardItem("0"),
+            QStandardItem("0"),
         ]
         self.model.appendRow(nueva)
 
@@ -155,5 +168,7 @@ class EditorAPUs(QWidget):
         limpiar_filas_subtotales(self.model)
         recalcular_apu(self.model)
 
+
 def crear_editor_apus():
     return EditorAPUs()
+
