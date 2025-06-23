@@ -7,6 +7,7 @@ import config
 from filtros import cargar_tipo_partidas
 from vista_editor_apus import crear_editor_apus
 
+
 class EditorPartidas(QWidget):
     def __init__(self):
         super().__init__()
@@ -38,8 +39,16 @@ class EditorPartidas(QWidget):
 
         self.model = QStandardItemModel()
         self.model.setHorizontalHeaderLabels([
-            "ID", "Código", "Nombre", "Unidad", "Cantidad",
-            "Subtotal", "P.U Oferta", "G.G", "Utilidad", "Total"
+            "ID",
+            "Código",
+            "Nombre",
+            "Unidad",
+            "Cantidad",
+            "Subtotal",
+            "P.U Oferta",
+            "G.G",
+            "Utilidad",
+            "Total",
         ])
         self.table.setModel(self.model)
 
@@ -51,30 +60,28 @@ class EditorPartidas(QWidget):
         self.model.removeRows(0, self.model.rowCount())
         tipo_filtro = self.combo_tipo_partida.currentText()
 
-        # Aplicar filtro solo si no es "Todos"
-        condicion_filtro = ""
-        if tipo_filtro and tipo_filtro.strip().lower() != "todos":
-            condicion_filtro = f"AND tipo_partida = '{tipo_filtro}'"
+        query = (
+            "SELECT id_partida, codigo_partida, partida_name, unidad, cantidad, "
+            "subtotal, p_u_oferta, gg, utilidad, total "
+            "FROM partidas WHERE id_proyecto = :id_proyecto"
+        )
+        params = {"id_proyecto": config.id_proyecto_actual}
 
-        query = f"""
-            SELECT id_partida, codigo_partida, partida_name, unidad, cantidad,
-                   subtotal, p_u_oferta, gg, utilidad, total
-            FROM partidas
-            WHERE id_proyecto = {config.id_proyecto_actual}
-            {condicion_filtro}
-            ORDER BY id_partida
-        """
+        if tipo_filtro and tipo_filtro.strip().lower() != "todos":
+            query += " AND tipo_partida = :tipo"
+            params["tipo"] = tipo_filtro
+        query += " ORDER BY id_partida"
 
         try:
             with db.engine.connect() as conn:
-                result = conn.execute(text(query))
+                result = conn.execute(text(query), params)
                 for row in result:
                     items = []
                     for val in row:
                         if isinstance(val, bytes):
                             try:
                                 val = val.decode("latin1")
-                            except:
+                            except Exception:
                                 val = "??"
                         items.append(QStandardItem(str(val)))
                     self.model.appendRow(items)
@@ -94,3 +101,4 @@ class EditorPartidas(QWidget):
 
 def crear_editor_partidas():
     return EditorPartidas()
+
