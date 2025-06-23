@@ -4,6 +4,7 @@ from db import DBManager
 import config
 from sqlalchemy import text
 
+
 class SubAPUEditor(QWidget):
     def __init__(self):
         super().__init__()
@@ -21,8 +22,16 @@ class SubAPUEditor(QWidget):
 
         self.model = QStandardItemModel()
         self.model.setHorizontalHeaderLabels([
-            "ID", "Código", "Recurso", "Tipo", "Unidad",
-            "Cuadrilla", "Rendimiento", "Cantidad", "Precio", "Parcial"
+            "ID",
+            "Código",
+            "Recurso",
+            "Tipo",
+            "Unidad",
+            "Cuadrilla",
+            "Rendimiento",
+            "Cantidad",
+            "Precio",
+            "Parcial",
         ])
         self.table.setModel(self.model)
 
@@ -32,26 +41,25 @@ class SubAPUEditor(QWidget):
         db = DBManager()
         self.model.removeRows(0, self.model.rowCount())
 
-        query = f"""
-            SELECT id_sub_apu, codigo_recurso, recurso_name, tipo, unidad,
-                   cuadrilla, rendimiento, cantidad, precio, parcial
-            FROM sub_apu_programado
-            WHERE codigo_subpartida = '{config.codigo_subpartida_actual}'
-            ORDER BY id_sub_apu
-        """
+        query = (
+            "SELECT id_sub_apu, codigo_recurso, recurso_name, tipo, unidad, "
+            "cuadrilla, rendimiento, cantidad, precio, parcial "
+            "FROM sub_apu_programado WHERE codigo_subpartida = :codigo ORDER BY id_sub_apu"
+        )
 
         try:
             with db.engine.connect() as conn:
-                result = conn.execute(text(query))
+                result = conn.execute(text(query), {"codigo": config.codigo_subpartida_actual})
                 for row in result:
                     items = []
                     for val in row:
                         if isinstance(val, bytes):
                             try:
                                 val = val.decode("latin1")
-                            except:
+                            except Exception:
                                 val = "??"
                         items.append(QStandardItem(str(val)))
                     self.model.appendRow(items)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"No se pudieron cargar los datos del Sub APU:\n{e}")
+

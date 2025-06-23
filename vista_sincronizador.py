@@ -1,7 +1,15 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QListWidget, QListWidgetItem, QCheckBox,
-    QMessageBox, QComboBox, QSizePolicy
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QListWidget,
+    QListWidgetItem,
+    QCheckBox,
+    QMessageBox,
+    QComboBox,
+    QSizePolicy,
 )
 from PyQt5.QtCore import Qt
 from sincronizador import sincronizar, obtener_tablas
@@ -23,7 +31,6 @@ def crear_sincronizador_ui():
     lista_tablas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     layout.addWidget(lista_tablas)
 
-    # Selector de dirección de sincronización
     combo_direccion = QComboBox()
     combo_direccion.addItem("⬆️ Local ➜ Online", userData="local_a_online")
     combo_direccion.addItem("⬇️ Online ➜ Local", userData="online_a_local")
@@ -43,31 +50,31 @@ def crear_sincronizador_ui():
                 lista_tablas.addItem(item)
                 lista_tablas.setItemWidget(item, checkbox)
         except Exception as e:
-            QMessageBox.critical(ventana, "Error", f"No se pudieron cargar las tablas:\\n{str(e)}")
+            QMessageBox.critical(ventana, "Error", f"No se pudieron cargar las tablas:\n{str(e)}")
 
     combo_direccion.currentIndexChanged.connect(cargar_tablas_dinamicamente)
 
-    # Botón de sincronización
     boton_sincronizar = QPushButton("🔁 Sincronizar")
     layout.addWidget(boton_sincronizar)
 
-    # Botón de backup local
     boton_backup = QPushButton("📦 Hacer Backup Local")
     layout.addWidget(boton_backup)
 
     def ejecutar_backup_local():
         try:
-            pg_bin = r"C:\\Program Files\\PostgreSQL\\17\\bin\\pg_dump.exe"
-            archivo_backup = os.path.expanduser("~\\OneDrive\\ID_Jergo\\backup_jergo_db.backup")
+            pg_bin = os.getenv("PG_DUMP_PATH", "pg_dump")
+            archivo_backup = os.path.expanduser("~/.backup_jergo_db.backup")
             comando = [
                 pg_bin,
-                "-U", "postgres",
-                "-F", "c",
-                "-f", archivo_backup,
-                "jergo_local"
+                "-U",
+                "postgres",
+                "-F",
+                "c",
+                "-f",
+                archivo_backup,
+                "jergo_local",
             ]
-            # Ejecutar comando con variable de entorno para contraseña
-            resultado = subprocess.run(comando, env={"PGPASSWORD": "1113"}, capture_output=True, text=True)
+            resultado = subprocess.run(comando, env={"PGPASSWORD": os.getenv("PGPASSWORD", "")}, capture_output=True, text=True)
 
             if resultado.returncode == 0:
                 QMessageBox.information(ventana, "Backup exitoso", f"Backup creado en:\n{archivo_backup}")
@@ -93,7 +100,7 @@ def crear_sincronizador_ui():
             ventana,
             "Confirmar sincronización",
             f"¿Estás seguro de sincronizar {len(tablas_seleccionadas)} tabla(s) en dirección:\n{combo_direccion.currentText()}?",
-            QMessageBox.Yes | QMessageBox.No
+            QMessageBox.Yes | QMessageBox.No,
         )
 
         if confirmacion == QMessageBox.Yes:
@@ -104,6 +111,7 @@ def crear_sincronizador_ui():
     boton_backup.clicked.connect(ejecutar_backup_local)
     ventana.setLayout(layout)
 
-    cargar_tablas_dinamicamente()  # Cargar al abrir
+    cargar_tablas_dinamicamente()
 
     return ventana
+
