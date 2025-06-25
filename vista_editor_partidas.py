@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from sqlalchemy import text
-from db import DBManager
+from db import DBManager, decodificar
 import config
 from filtros import cargar_tipo_partidas
 from vista_editor_apus import crear_editor_apus
@@ -78,11 +78,7 @@ class EditorPartidas(QWidget):
                 for row in result:
                     items = []
                     for val in row:
-                        if isinstance(val, bytes):
-                            try:
-                                val = val.decode("latin1")
-                            except Exception:
-                                val = "??"
+                        val = decodificar(val)
                         items.append(QStandardItem(str(val)))
                     self.model.appendRow(items)
         except Exception as e:
