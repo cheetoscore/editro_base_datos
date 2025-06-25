@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from db import DBManager
 from sqlalchemy.exc import SQLAlchemyError
 import config

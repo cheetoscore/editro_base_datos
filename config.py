@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Configuración global de la aplicación."""
 
 # ID del proyecto seleccionado actualmente

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
 
 class SelectorModoDialog(QDialog):
