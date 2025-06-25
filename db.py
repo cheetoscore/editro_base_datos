@@ -24,7 +24,7 @@ class DBManager:
             print("📡 Modo seleccionado: NUBE")
             db_url = os.getenv(
                 "DB_ONLINE_URL",
-                "postgresql://user:pass@host/jergo_db?sslmode=require",
+                "postgresql://jergo_db_owner:npg_p0Shbuz1Nijq@ep-bitter-glade-a5fgh7ka-pooler.us-east-2.aws.neon.tech/jergo_db?sslmode=require&channel_binding=require",
             )
             return create_engine(
                 db_url,
