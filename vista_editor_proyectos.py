@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QTableView, QMessageBox
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from sqlalchemy import text
-from db import DBManager
+from db import DBManager, decodificar
 
 
 class EditorProyectos(QWidget):
@@ -42,11 +42,7 @@ class EditorProyectos(QWidget):
                 for row in result:
                     items = []
                     for valor in row:
-                        if isinstance(valor, bytes):
-                            try:
-                                valor = valor.decode('latin1')
-                            except:
-                                valor = "??"
+                        valor = decodificar(valor)
                         items.append(QStandardItem(str(valor)))
                     self.model.appendRow(items)
         except Exception as e:

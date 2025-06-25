@@ -6,6 +6,16 @@ import pandas as pd
 import config
 
 
+def decodificar(valor):
+    """Decode bytes using latin1, returning a placeholder on failure."""
+    if isinstance(valor, bytes):
+        try:
+            return valor.decode("latin1")
+        except Exception:
+            return "??"
+    return valor
+
+
 class DBManager:
     def __init__(self):
         self.modo = config.modo_operacion
@@ -40,14 +50,6 @@ class DBManager:
                 result = conn.execute(text(query), params or {})
                 rows = result.fetchall()
                 cols = result.keys()
-
-                def decodificar(valor):
-                    if isinstance(valor, bytes):
-                        try:
-                            return valor.decode("latin1")
-                        except Exception:
-                            return "??"
-                    return valor
 
                 data_limpia = [[decodificar(val) for val in row] for row in rows]
                 return pd.DataFrame(data_limpia, columns=cols)

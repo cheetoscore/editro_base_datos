@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QComboBox, QPushButton, QMessageBox
 from sqlalchemy import text
-from db import DBManager
+from db import DBManager, decodificar
 import config
 
 class SelectorProyectoDialog(QDialog):
@@ -36,10 +36,7 @@ class SelectorProyectoDialog(QDialog):
                     id_proyecto = row[0]
                     nombre = row[1]
                     if isinstance(nombre, bytes):
-                        try:
-                            nombre = nombre.decode("latin1")
-                        except:
-                            nombre = "??"
+                        nombre = decodificar(nombre)
                     texto = f"{id_proyecto} - {nombre}"
                     self.combo.addItem(texto, id_proyecto)
         except Exception as e:
