@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QMessageBox
 from sqlalchemy import text

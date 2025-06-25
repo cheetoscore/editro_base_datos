@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QDialog
 from vista_editor_proyectos import crear_editor_proyectos
