@@ -7,8 +7,16 @@ from sqlalchemy.exc import SQLAlchemyError
 DB_LOCAL_URL = os.getenv("DB_LOCAL_URL", "postgresql://postgres:password@localhost/jergo_local")
 DB_ONLINE_URL = os.getenv("DB_ONLINE_URL", "postgresql://user:pass@host/jergo_db?sslmode=require")
 
-engine_local = create_engine(DB_LOCAL_URL, pool_pre_ping=True)
-engine_online = create_engine(DB_ONLINE_URL, pool_pre_ping=True)
+engine_local = create_engine(
+    DB_LOCAL_URL,
+    pool_pre_ping=True,
+    connect_args={"client_encoding": "latin1"},
+)
+engine_online = create_engine(
+    DB_ONLINE_URL,
+    pool_pre_ping=True,
+    connect_args={"client_encoding": "latin1"},
+)
 
 # 🔁 Orden correcto de tablas según relaciones foráneas
 ORDEN_DEPENDENCIAS = [

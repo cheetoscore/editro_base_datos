@@ -29,7 +29,13 @@ class DBManager:
                 "DB_LOCAL_URL",
                 "postgresql://postgres:password@localhost:5432/jergo_local",
             )
-            return create_engine(db_url, echo=False, pool_size=1, max_overflow=0)
+            return create_engine(
+                db_url,
+                echo=False,
+                pool_size=1,
+                max_overflow=0,
+                connect_args={"client_encoding": "latin1"},
+            )
         else:
             print("📡 Modo seleccionado: NUBE")
             db_url = os.getenv(
@@ -42,6 +48,7 @@ class DBManager:
                 max_overflow=20,
                 pool_recycle=1800,
                 pool_timeout=30,
+                connect_args={"client_encoding": "latin1"},
             )
 
     def obtener_dataframe(self, query: str, params: dict | None = None) -> pd.DataFrame:
