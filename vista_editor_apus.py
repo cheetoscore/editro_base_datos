@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QTableView, QMessageBox, QPushButton, QHBoxLayout
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from sqlalchemy import text
-from db import DBManager
+from db import DBManager, decodificar
 import config
 from vista_editor_sub_apu import SubAPUEditor
 from vista_editor_insumos import crear_editor_insumos
@@ -96,7 +96,7 @@ class EditorAPUs(QWidget):
                 for row in rows:
                     items = []
                     for val in row[:-2]:
-                        val = val.decode("latin1") if isinstance(val, bytes) else val
+                        val = decodificar(val)
                         items.append(QStandardItem(str(val)))
                     self.model.appendRow(items)
 
